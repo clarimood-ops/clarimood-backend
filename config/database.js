@@ -17,6 +17,7 @@ console.log("[DEBUG] DB_HOST:", dbConfig.host)
 console.log("[DEBUG] DB_NAME:", dbConfig.database)
 console.log("[DEBUG] DB_USER:", dbConfig.user)
 console.log("[DEBUG] DB_PORT:", dbConfig.port)
+console.log("[DEBUG] Full dbConfig passed to Pool:", JSON.stringify(dbConfig, null, 2))
 
 if (!dbConfig.host || !dbConfig.database || !dbConfig.user || !dbConfig.password) {
   console.error("[ERROR] Missing required database configuration!")
@@ -29,12 +30,18 @@ if (!dbConfig.host || !dbConfig.database || !dbConfig.user || !dbConfig.password
 
 const pool = new Pool(dbConfig)
 
-pool.on("connect", () => {
-  console.log("Connected to PostgreSQL database at:", dbConfig.host)
+pool.on("connect", (client) => {
+  console.log("[DEBUG] Pool connection established")
+  console.log("[DEBUG] Connected to:", client.host, "port:", client.port)
 })
 
 pool.on("error", (err) => {
-  console.error("Database pool error:", err)
+  console.error("[ERROR] Database pool error:", err)
+  console.error("[ERROR] Error occurred with host:", err.address, "port:", err.port)
+})
+
+pool.on("acquire", () => {
+  console.log("[DEBUG] Pool acquiring connection...")
 })
 
 module.exports = pool
